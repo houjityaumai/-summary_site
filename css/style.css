@@ -1,0 +1,35 @@
+@charset "UTF-8";
+
+html {
+  font-size: 62.5%;
+}
+body {
+  font-size: 1.4rem;
+  margin: 0;
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+.clearfix::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+.mario {
+  position: absolute;
+  top: 500px;
+  left: 0;
+}
+canvas {
+  background: url(../img/mariobg1.png);
+  background-color: antiquewhite;
+  margin: 0 0;
+  background-size: cover;
+  display: block;
+  margin: 0 auto;
+  width: 1200;
+  /* height: 100vh; */
+}
