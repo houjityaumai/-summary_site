@@ -1,8 +1,8 @@
 $(function () {
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
-  const WIDTH = 1000;
-  const HEIGHT = 800;
+  const WIDTH = 1200;
+  const HEIGHT = 830;
   canvas.width = WIDTH;
   canvas.height = HEIGHT;
   const SPEED = 3.5;
@@ -61,7 +61,7 @@ $(function () {
 
   //マリオ
   const IMG_SIZE = 60;
-  const mario = new Mario(100, 620, IMG_SIZE);
+  const mario = new Mario(100, 645, IMG_SIZE);
   mario.image.src = marios[6];
   //マリオ更新後の座標
   let updatedX = mario.x;
@@ -84,11 +84,11 @@ $(function () {
   //アイテムブロック座標
   const ITEM_IMG = 60;
   // アイテム1
-  let item1_x = 300;
+  let item1_x = 400;
   let item1_y = 500;
 
   // アイテム2
-  let item2_x = 650;
+  let item2_x = 750;
   let item2_y = 500;
 
   let itemblocks = [
@@ -98,9 +98,9 @@ $(function () {
 
   //ブロック
   let blocks = [
-    { x: 0, y: 680, w: 1000, h: 60 },
-    { x: 0, y: 730, w: 1000, h: 60 },
-    { x: 0, y: 780, w: 1000, h: 60 },
+    { x: 0, y: 705, w: 2000, h: 60 },
+    { x: 0, y: 765, w: 2000, h: 60 },
+    // { x: 0, y: 780, w: 2000, h: 60 },
   ];
 
   window.addEventListener("load", update);
