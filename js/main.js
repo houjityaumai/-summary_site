@@ -6,6 +6,8 @@ $(function () {
   canvas.width = WIDTH;
   canvas.height = HEIGHT;
   const SPEED = 3.5;
+  // アイテムブロック
+  const ITEM_IMG = 60;
   // 直前までブロックに乗ってた？
   let befoerOnBlock = null;
   const marios = [
@@ -23,84 +25,43 @@ $(function () {
   // 0 右 1 左
   let muki = 0;
 
-  //クラス設定
-  //marioクラス
-  class Mario {
-    constructor(x, y, imagesize) {
-      this.x = x;
-      this.y = y;
-      this.image = new Image();
-      this.height = imagesize;
-      this.width = imagesize;
-    }
-
-    // 画像変更
-    chenge_img(img) {
-      this.image.src = `${img}`;
-    }
-
-    // 走ってる
-    run_img(img1, img2, speed, times) {
-      if (times % (speed * 2) == 0) {
-        this.chenge_img(img1);
-      } else if (times % speed == 0) {
-        this.chenge_img(img2);
-      }
-    }
-  }
-  // アイテムブロッククラス
-  class ItemBlock {
-    constructor(x, y, imagesize, url) {
-      this.x = x;
-      this.y = y;
-      this.width = imagesize;
-      this.height = imagesize;
-      this.url = url;
-    }
-  }
-
   //マリオ
   const IMG_SIZE = 60;
-  const mario = new Mario(100, 645, IMG_SIZE);
+  const mario = new Mario(580, 645, IMG_SIZE);
   mario.image.src = marios[6];
   //マリオ更新後の座標
   let updatedX = mario.x;
   let updatedY = mario.y;
 
   //アイテムブロック
-
-  let item_block1_img = new Image();
-  item_block1_img.src = "img/アイテムブロック.png";
-
-  let item_block2_img = new Image();
-  item_block2_img.src = "img/アイテムブロック.png";
+  //アイテムブロック座標
+  let itemblocks = [
+    new ItemBlock(300, 450, ITEM_IMG, "./ruby/index.html"),
+    new ItemBlock(850, 450, ITEM_IMG, "./java/index.html"),
+  ];
 
   // logo
-  let logo1 = new Image();
-  logo1.src = "img/ruby_logo.png";
-  let logo2 = new Image();
-  logo2.src = "img/java_logo.png";
-
-  //アイテムブロック座標
-  const ITEM_IMG = 60;
-  // アイテム1
-  let item1_x = 400;
-  let item1_y = 500;
-
-  // アイテム2
-  let item2_x = 750;
-  let item2_y = 500;
-
-  let itemblocks = [
-    new ItemBlock(item1_x, item1_y, ITEM_IMG, "./ruby/index.html"),
-    new ItemBlock(item2_x, item2_y, ITEM_IMG, "./java/index.html"),
+  let logos = [
+    new Logo(
+      itemblocks[0].x - 30,
+      itemblocks[0].y,
+      120,
+      50,
+      "img/ruby_logo.png"
+    ),
+    new Logo(
+      itemblocks[1].x - 30,
+      itemblocks[1].y,
+      120,
+      50,
+      "img/java_logo.png"
+    ),
   ];
 
   //ブロック
   let blocks = [
     { x: 0, y: 705, w: 2000, h: 60 },
     { x: 0, y: 765, w: 2000, h: 60 },
-    // { x: 0, y: 780, w: 2000, h: 60 },
   ];
 
   window.addEventListener("load", update);
@@ -186,14 +147,19 @@ $(function () {
       updatedY = blockOn.y - mario.height;
       isJump = false;
     }
+    updatedX += move_x(mario);
 
     mario.x = updatedX;
     mario.y = updatedY;
-    ctx.drawImage(logo1, item1_x - 30, item1_y - 50, 120, 50);
-    ctx.drawImage(logo2, item2_x - 30, item2_y - 50, 120, 50);
+
+    logos.forEach(function (logo) {
+      logo.move_logo();
+      ctx.drawImage(logo.image, logo.x, logo.y, logo.width, logo.height);
+    });
     ctx.drawImage(mario.image, mario.x, mario.y, mario.width, mario.height);
-    ctx.drawImage(item_block1_img, item1_x, item1_y, ITEM_IMG, ITEM_IMG);
-    ctx.drawImage(item_block2_img, item2_x, item2_y, ITEM_IMG, ITEM_IMG);
+    itemblocks.forEach(function (item) {
+      ctx.drawImage(item.image, item.x, item.y, ITEM_IMG, ITEM_IMG);
+    });
 
     ctx.fillStyle = "rgba(255, 255, 255, 0)";
     for (const block of blocks) {
@@ -277,6 +243,9 @@ $(function () {
       } else if (result.collisionDirection == "bottom") {
         updatedY = itemblocks[result.index].y + ITEM_IMG;
         vy = 3.5;
+        logos[result.index].move_flg = true;
+        itemblocks[result.index].chenge_img("img/はてな2.svg");
+        logos[result.index].move_flg = true;
         setTimeout(function () {
           window.location.href = itemblocks[result.index].url;
         }, 500);
@@ -329,4 +298,30 @@ $(function () {
     }
     return null;
   }
+
+  // ruby java むくむく
+  function mukumuku(logo) {
+    logo;
+  }
+  // 端っこ
+  function move_x(mario) {
+    let updatedX = 0;
+    if (mario.x <= 0 - mario.width) {
+      updatedX = WIDTH + mario.width;
+    } else if (mario.x >= WIDTH + mario.width) {
+      // 右の端 + マリオのimgサイズ分、左に移動するようにしているため、右から出てくるときはmario.widthの2倍となる
+      updatedX = -(WIDTH + mario.width * 2);
+    }
+    return updatedX;
+  }
+
+  //loding
+  function lodingBgImg() {
+    const $bg = $(".loding");
+    $bg.css({
+      display: "none",
+    });
+  }
+
+  setTimeout(lodingBgImg, 2000);
 });

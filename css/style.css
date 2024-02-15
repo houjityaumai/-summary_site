@@ -4,6 +4,7 @@ html {
   font-size: 62.5%;
 }
 body {
+  position: relative;
   font-family: "DotGothic16", sans-serif;
   font-size: 1.4rem;
   margin: 0;
@@ -28,12 +29,16 @@ body {
   left: 0;
 }
 #canvas {
+  width: 1200px;
+  height: 830px;
+  z-index: 10;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%);
   background: url(../img/マリオ背景.png);
   background-color: antiquewhite;
-  margin: 0 0;
   background-size: cover;
   display: block;
-  margin: auto auto;
   border-top: 10px solid rgb(212, 210, 210);
   border-right: 10px solid rgb(68, 68, 68);
   border-bottom: 10px solid rgb(48, 48, 48);
@@ -49,4 +54,41 @@ body {
   top: 20px;
   left: 150px;
   color: white;
+}
+
+/* ローディング */
+.loding {
+  display: flex;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%);
+  z-index: 1000;
+  background-color: black;
+  box-sizing: border-box;
+  width: 1200px;
+  height: 830px;
+  border-top: 10px solid rgb(212, 210, 210);
+  border-right: 10px solid rgb(68, 68, 68);
+  border-bottom: 10px solid rgb(48, 48, 48);
+  border-left: 10px solid rgb(157, 157, 157);
+}
+
+.mario-zanki {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+}
+
+.loding p {
+  font-size: 40px;
+}
+
+.loding img {
+  width: 40px;
+  margin-right: 10px;
 }
