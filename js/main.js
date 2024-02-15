@@ -3,7 +3,7 @@ $(function () {
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
 
-  //クラス設定
+  //クラス設定------------------------------------------------------------------------------------------------------
   // 設定クラス
   class Setting {
     constructor(width, height, speed, item_block_size) {
@@ -13,14 +13,14 @@ $(function () {
       this.item_block_size = item_block_size;
       this.gravity = 1;
       this.mario_imgs = [
-        "img/mario-run1-right.png",
-        "img/mario-run1-left.png",
-        "img/mario-run2-right.png",
-        "img/mario-run2-left.png",
-        "img/mario-junp-right.png",
-        "img/mario-junp-left.png",
-        "img/mario-nomal-right.png",
-        "img/mario-nomal-left.png",
+        "img/mario/mario-run1-right.png",
+        "img/mario/mario-run1-left.png",
+        "img/mario/mario-run2-right.png",
+        "img/mario/mario-run2-left.png",
+        "img/mario/mario-junp-right.png",
+        "img/mario/mario-junp-left.png",
+        "img/mario/mario-nomal-right.png",
+        "img/mario/mario-nomal-left.png",
       ];
     }
   }
@@ -111,7 +111,7 @@ $(function () {
       this.height = imagesize;
       this.url = url;
       this.image = new Image();
-      this.image.src = "img/アイテムブロック.png";
+      this.image.src = "img/block/アイテムブロック.png";
       this.itemblocks = [];
     }
 
@@ -199,7 +199,7 @@ $(function () {
         mario.run_img(set.mario_imgs[0], set.mario_imgs[2], 5, mario.time);
         mario.updatedX += set.speed;
       }
-      if (this.input_key[38] && !mario.isJump) {
+      if ((this.input_key[38] || this.input_key[32]) && !mario.isJump) {
         set.gravity = -25;
         mario.isJump = true;
       }
@@ -271,7 +271,7 @@ $(function () {
       let result = null;
       itemblocks.forEach((item, index) => {
         if (this.collision(mario, item)) {
-          //--------ここらへんコピペ 悔しい------------------------------------------
+          //--------ここらへんコピペ 悔しい----------
           //それぞれの真中の位置を取得
           const marioCenterX = mario.x + mario.imagesize / 2;
           const marioCenterY = mario.y + mario.imagesize / 2;
@@ -297,7 +297,7 @@ $(function () {
           }
 
           result = { collisionDirection: collisionDirection, index: index };
-          //-----------------------------------------------------------------------
+          //-------------------------
         }
       });
       return result;
@@ -316,7 +316,7 @@ $(function () {
           mario.updatedY = itemblocks[result.index].y + set.item_block_size;
           set.gravity = 3.5;
           logos[result.index].move_flg = true;
-          itemblocks[result.index].chenge_img("img/はてな2.svg");
+          itemblocks[result.index].chenge_img("img/block/はてな2.svg");
           logos[result.index].move_flg = true;
           setTimeout(function () {
             window.location.href = itemblocks[result.index].url;
@@ -345,17 +345,18 @@ $(function () {
       }
     }
   }
+  //------------------------------------------------------------------------------------------------------
 
-  // 設定
+  //インスタンス生成等------------------------------------------------------------------------------------------------------
   // 衝突インスタンス生成
   const collision = new Collision();
-  // セッティングクラス生成
+  // セッティングインスタンス生成
   const set = new Setting(1200, 830, 3.5, 60);
   // キャンバスの大きさを設定
   canvas.width = set.width;
   canvas.height = set.height;
 
-  //マリオ
+  //マリオインスタンス
   const mario = new Mario(580, 645, 60);
 
   // 地面ブロック
@@ -373,23 +374,24 @@ $(function () {
       itemblocks[0].y,
       120,
       50,
-      "img/ruby_logo.png"
+      "img/logo/ruby_logo.png"
     ),
     new Logo(
       itemblocks[1].x - 30,
       itemblocks[1].y,
       120,
       50,
-      "img/java_logo.png"
+      "img/logo/java_logo.png"
     ),
   ];
 
-  // キー入力クラス生成
+  // キー入力インスタンス生成
   const key = new Key();
 
   window.addEventListener("load", update);
+  //------------------------------------------------------------------------------------------------------
 
-  // 描画し続ける
+  // ゲーム-----------------------------------------------------------------------------------------------
   function update() {
     // 毎度画面をリセット やらないとマリオの軌跡がずっと描画されてる
     ctx.clearRect(0, 0, set.width, set.height);
@@ -437,8 +439,7 @@ $(function () {
     // updateを何度も繰り返す
     window.requestAnimationFrame(update);
   }
-
-  // 端っこ
+  // -----------------------------------------------------------------------------------------------
 
   //loding画面
   function lodingBgImg() {
@@ -447,6 +448,5 @@ $(function () {
       display: "none",
     });
   }
-
   setTimeout(lodingBgImg, 2000);
 });

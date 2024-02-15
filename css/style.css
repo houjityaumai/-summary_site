@@ -8,7 +8,7 @@ body {
   font-family: "DotGothic16", sans-serif;
   font-size: 1.4rem;
   margin: 0;
-  background-image: url("../img/アイテムブロック.png");
+  background-image: url("../img/block/アイテムブロック.png");
 
   /* background-size: contain; */
 }
