@@ -11,7 +11,6 @@ $(function () {
       this.height = height;
       this.speed = speed;
       this.item_block_size = item_block_size;
-      this.gravity = 1;
       this.mario_imgs = [
         "img/mario/mario-run1-right.png",
         "img/mario/mario-run1-left.png",
@@ -40,6 +39,7 @@ $(function () {
       this.updatedY = y;
       this.befoerOnBlock = null;
       this.isJump = false;
+      this.gravity = 1;
     }
 
     // 画像変更
@@ -82,12 +82,28 @@ $(function () {
         this.x,
         this.y,
         this.updatedX,
-        this.updatedY
+        this.updatedY,
+        this.imagesize
       );
       if (blockOn) {
         this.updatedY = blockOn.y - this.height;
         this.isJump = false;
       }
+    }
+
+    // マリオの向き
+    after_itemOn(itemOn, set) {
+      this.updatedY = itemOn.y - this.height; // マリオのY座標をアイテムブロックの上に合わせる
+      this.isJump = false;
+      this.gravity = 0; // Y速度をリセット
+      if (!this.befoerOnBlock) {
+        if (this.muki == 0) {
+          this.chenge_img(set.mario_imgs[6]);
+        } else if (mario.muki == 1) {
+          this.chenge_img(set.mario_imgs[7]);
+        }
+      }
+      this.befoerOnBlock = true;
     }
 
     // 端っこに行ったら、反対から出てくる
@@ -137,7 +153,7 @@ $(function () {
 
   // ロゴクラス
   class Logo {
-    constructor(x, y, width, height, img_url) {
+    constructor(x, y, width, height, img_url, url) {
       this.image = new Image();
       this.image.src = img_url;
       this.x = x;
@@ -148,17 +164,37 @@ $(function () {
       this.updatedY = y;
       this.move_flg = false;
       this.stop = y - 40;
+      this.gravity = 1;
+      this.active = false;
+      this.url = url;
     }
 
     move_logo() {
       if (this.move_flg == true) {
-        console.log("aaa");
         this.updatedY = this.updatedY - 1.5;
         this.y = this.updatedY;
         // 一定の高さで
         if (this.y < this.stop) {
           this.move_flg = false;
+          this.active = true;
         }
+      }
+    }
+
+    move_logo_x_and_y() {
+      if (this.active) {
+        this.updatedX += 1;
+        this.updatedY += this.gravity;
+        this.x = this.updatedX;
+        this.y = this.updatedY;
+      }
+    }
+
+    after_itemOn(itemOn, set) {}
+
+    move_directry(coll, mario, logo) {
+      if (coll.collision(mario, logo)) {
+        window.location.href = this.url;
       }
     }
   }
@@ -200,7 +236,7 @@ $(function () {
         mario.updatedX += set.speed;
       }
       if ((this.input_key[38] || this.input_key[32]) && !mario.isJump) {
-        set.gravity = -25;
+        mario.gravity = -25;
         mario.isJump = true;
       }
       if (mario.isJump) {
@@ -210,13 +246,14 @@ $(function () {
         } else if (mario.muki == 1) {
           mario.chenge_img(set.mario_imgs[5]);
         }
-        mario.updatedY = mario.y + set.gravity;
-        set.gravity += 1;
+        mario.updatedY = mario.y + mario.gravity;
+        mario.gravity += 1;
         const blockTargetIsOn = Block.onTheBlock(
           mario.x,
           mario.y,
           mario.updatedX,
-          mario.updatedY
+          mario.updatedY,
+          mario.imagesize
         );
         if (blockTargetIsOn) {
           mario.isJump = false;
@@ -238,12 +275,12 @@ $(function () {
     ];
 
     // ブロックに乗っているか
-    static onTheBlock(x, y, updatedX, updatedY) {
+    static onTheBlock(x, y, updatedX, updatedY, obj_iamgesize) {
       for (const b of Block.blocks) {
-        if (y + mario.imagesize <= b.y && updatedY + mario.imagesize >= b.y) {
+        if (y + obj_iamgesize <= b.y && updatedY + obj_iamgesize >= b.y) {
           if (
-            (x + mario.imagesize <= b.x || x >= b.x + b.y) &&
-            (updatedX + mario.imagesize <= b.x || updatedX >= b.w)
+            (x + obj_iamgesize <= b.x || x >= b.x + b.y) &&
+            (updatedX + obj_iamgesize <= b.x || updatedX >= b.w)
           ) {
             continue;
           }
@@ -267,14 +304,14 @@ $(function () {
     }
 
     //衝突後の動き(当たったアイテムの当たった部分と添え字を返す)
-    check_collision_direction(itemblocks) {
+    check_collision_direction(itemblocks, obj) {
       let result = null;
       itemblocks.forEach((item, index) => {
-        if (this.collision(mario, item)) {
+        if (this.collision(obj, item)) {
           //--------ここらへんコピペ 悔しい----------
           //それぞれの真中の位置を取得
-          const marioCenterX = mario.x + mario.imagesize / 2;
-          const marioCenterY = mario.y + mario.imagesize / 2;
+          const marioCenterX = obj.x + obj.imagesize / 2;
+          const marioCenterY = obj.y + obj.imagesize / 2;
           const itemCenterX = item.x + set.item_block_size / 2;
           const itemCenterY = item.y + set.item_block_size / 2;
 
@@ -282,8 +319,8 @@ $(function () {
           const dx = marioCenterX - itemCenterX;
           const dy = marioCenterY - itemCenterY;
 
-          const width = (mario.imagesize + set.item_block_size) / 2;
-          const height = (mario.imagesize + set.item_block_size) / 2;
+          const width = (obj.imagesize + set.item_block_size) / 2;
+          const height = (obj.imagesize + set.item_block_size) / 2;
 
           const crossWidth = width * dy;
           const crossHeight = height * dx;
@@ -304,42 +341,29 @@ $(function () {
     }
 
     // 当たったあと、どうなるか
-    collisioned(itemblocks, mario) {
-      let result = this.check_collision_direction(itemblocks, mario);
+    collisioned(itemblocks, obj) {
+      let result = this.check_collision_direction(itemblocks, obj);
 
       if (result) {
         if (result.collisionDirection == "left") {
-          mario.updatedX = itemblocks[result.index].x - mario.imagesize;
+          obj.updatedX = itemblocks[result.index].x - obj.imagesize;
         } else if (result.collisionDirection == "right") {
-          mario.updatedX = itemblocks[result.index].x + set.item_block_size;
+          obj.updatedX = itemblocks[result.index].x + set.item_block_size;
         } else if (result.collisionDirection == "bottom") {
-          mario.updatedY = itemblocks[result.index].y + set.item_block_size;
-          set.gravity = 3.5;
+          obj.updatedY = itemblocks[result.index].y + set.item_block_size;
+          obj.gravity = 3.5;
           logos[result.index].move_flg = true;
           itemblocks[result.index].chenge_img("img/block/はてな2.svg");
           logos[result.index].move_flg = true;
-          setTimeout(function () {
-            window.location.href = itemblocks[result.index].url;
-          }, 1000);
         } else if (result.collisionDirection == "top") {
           const itemOn = ItemBlock.onTheItem(
-            mario.x,
-            mario.y,
-            mario.updatedX,
-            mario.updatedY
+            obj.x,
+            obj.y,
+            obj.updatedX,
+            obj.updatedY
           );
           if (itemOn) {
-            mario.updatedY = itemOn.y - mario.height; // マリオのY座標をアイテムブロックの上に合わせる
-            mario.isJump = false;
-            set.gravity = 0; // Y速度をリセット
-            if (!mario.befoerOnBlock) {
-              if (mario.muki == 0) {
-                mario.chenge_img(set.mario_imgs[6]);
-              } else if (mario.muki == 1) {
-                mario.chenge_img(set.mario_imgs[7]);
-              }
-            }
-            mario.befoerOnBlock = true;
+            obj.after_itemOn(itemOn, set);
           }
         }
       }
@@ -370,18 +394,20 @@ $(function () {
   // logo
   let logos = [
     new Logo(
-      itemblocks[0].x - 30,
-      itemblocks[0].y,
-      120,
-      50,
-      "img/logo/ruby_logo.png"
+      itemblocks[0].x + 10,
+      itemblocks[0].y + 10,
+      40,
+      30,
+      "img/logo/ruby_logo.png",
+      "./ruby/index.html"
     ),
     new Logo(
-      itemblocks[1].x - 30,
-      itemblocks[1].y,
-      120,
-      50,
-      "img/logo/java_logo.png"
+      itemblocks[1].x + 10,
+      itemblocks[1].y + 10,
+      40,
+      30,
+      "img/logo/java_logo.png",
+      "./java/index.html"
     ),
   ];
 
@@ -405,17 +431,22 @@ $(function () {
 
     // アイテムブロックの上に立っているかどうか
     mario.get_on_and_off_itemblocks(set);
+
     // ブロックの上に立っているかどうか
     mario.stand_on_the_block();
     // 端っこ行ったら反対側からでる
     mario.move_x();
+
+    logos.forEach(function (logo) {
+      logo.move_logo();
+      logo.move_directry(collision, mario, logo);
+    });
     // マリオxy更新
     mario.x = mario.updatedX;
     mario.y = mario.updatedY;
 
     // ロゴ(ruby,java)描画
     logos.forEach(function (logo) {
-      logo.move_logo();
       ctx.drawImage(logo.image, logo.x, logo.y, logo.width, logo.height);
     });
     // マリオ描画
