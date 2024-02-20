@@ -193,7 +193,7 @@ $(function () {
     after_itemOn(itemOn, set) {}
 
     move_directry(coll, mario, logo) {
-      if (coll.collision(mario, logo)) {
+      if (coll.collision(mario, logo) && this.active) {
         window.location.href = this.url;
       }
     }
